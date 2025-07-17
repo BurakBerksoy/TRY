@@ -14,13 +14,18 @@ export default function Home() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const result = await getTasks();
-      if (result.success && result.data) {
-        setTasks(result.data);
-      } else {
-        setError(result.error || 'Failed to load tasks.');
+      try {
+        const result = await getTasks();
+        if (result.success && result.data) {
+          setTasks(result.data);
+        } else {
+          setError(result.error || 'Failed to load tasks.');
+        }
+      } catch (e: any) {
+        setError(e.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchTasks();
@@ -37,7 +42,11 @@ export default function Home() {
   if (error) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <p className="text-destructive-foreground">Error loading tasks: {error}</p>
+        <div className="rounded-lg border border-destructive bg-destructive/10 p-6 text-center text-destructive">
+          <h2 className="text-lg font-semibold">Error Loading Tasks</h2>
+          <p className="mt-2 text-sm">{error}</p>
+          <p className="mt-4 text-xs text-destructive/80">Please ensure the database is set up correctly. You may need to run `npx prisma migrate dev`.</p>
+        </div>
       </div>
     );
   }

@@ -1,20 +1,46 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import { getTasks } from '@/lib/actions';
 import { AddTaskDialog } from '@/components/task/add-task-dialog';
 import { TaskCard } from '@/components/task/task-card';
-import { List } from 'lucide-react';
+import { List, Loader2 } from 'lucide-react';
+import { Task } from '@/lib/definitions';
 
-export default async function Home() {
-  const result = await getTasks();
+export default function Home() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!result.success) {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const result = await getTasks();
+      if (result.success && result.data) {
+        setTasks(result.data);
+      } else {
+        setError(result.error || 'Failed to load tasks.');
+      }
+      setLoading(false);
+    };
+
+    fetchTasks();
+  }, []);
+
+  if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <p className="text-destructive-foreground">Error loading tasks: {result.error}</p>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
-  const tasks = result.data;
+  if (error) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <p className="text-destructive-foreground">Error loading tasks: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

@@ -13,6 +13,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = async () => {
+    // Re-enable fetching after the initial load issue is resolved
+    setLoading(true);
     try {
       const result = await getTasks();
       if (result.success && result.data) {
@@ -31,7 +33,7 @@ export default function Home() {
     fetchTasks();
   }, []);
 
-  if (loading) {
+  if (loading && tasks.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

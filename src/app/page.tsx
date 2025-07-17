@@ -12,22 +12,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const result = await getTasks();
-        if (result.success && result.data) {
-          setTasks(result.data);
-        } else {
-          setError(result.error || 'Failed to load tasks.');
-        }
-      } catch (e: any) {
-        setError(e.message || 'An unexpected error occurred.');
-      } finally {
-        setLoading(false);
+  const fetchTasks = async () => {
+    try {
+      const result = await getTasks();
+      if (result.success && result.data) {
+        setTasks(result.data);
+      } else {
+        setError(result.error || 'Failed to load tasks.');
       }
-    };
+    } catch (e: any) {
+      setError(e.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTasks();
   }, []);
 

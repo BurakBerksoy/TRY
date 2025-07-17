@@ -1,22 +1,9 @@
 import { z } from 'zod';
+import type { Project as PrismaProject, SubTask as PrismaSubTask } from '@prisma/client';
 
 // Base Prisma-like types for reference
-export type Project = {
-  id: string;
-  title: string;
-  imageUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type SubTask = {
-  id: string;
-  text: string;
-  completed: boolean;
-  projectId: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type Project = PrismaProject;
+export type SubTask = PrismaSubTask;
 
 // Type that includes the relation
 export type ProjectWithSubTasks = Project & {
@@ -24,16 +11,16 @@ export type ProjectWithSubTasks = Project & {
 };
 
 // Zod schemas for validation if needed (e.g., for forms)
-export const SubTaskSchema = z.object({
-  id: z.string(),
-  text: z.string(),
-  completed: z.boolean(),
-  projectId: z.string(),
-});
-
 export const ProjectSchema = z.object({
   id: z.string(),
   title: z.string(),
   imageUrl: z.string().url(),
-  subTasks: z.array(SubTaskSchema),
+  subTasks: z.array(z.object({
+      id: z.string(),
+      text: z.string(),
+      completed: z.boolean(),
+      projectId: z.string(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+  })),
 });

@@ -73,7 +73,7 @@ export async function planProjectWithAI(prompt: string): Promise<ActionState<{pr
     // Generate the project plan from the AI flow
     const projectPlan = await generateProjectPlan({ prompt });
 
-    if (!projectPlan.title || projectPlan.subTasks.length === 0) {
+    if (!projectPlan || !projectPlan.title || !projectPlan.subTasks || projectPlan.subTasks.length === 0) {
       return { success: false, error: 'AI could not generate a valid project plan. Please try a different prompt.' };
     }
     

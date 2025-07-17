@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 import { prisma } from './prisma';
 import { generateProjectPlan } from '@/ai/flows/generate-project-plan';
 import { ProjectWithSubTasks, SubTask } from '@/lib/definitions';
@@ -30,6 +29,7 @@ export async function getProjects(): Promise<ActionState<ProjectWithSubTasks[]>>
     return { success: true, data: projects };
   } catch (e) {
     const error = e instanceof Error ? e.message : 'Database error';
+    console.error(`Error in getProjects: ${error}`);
     return { success: false, error };
   }
 }
@@ -40,7 +40,9 @@ export async function deleteProject(id: string): Promise<ActionState<null>> {
     revalidatePath('/');
     return { success: true };
   } catch (e) {
-    return { success: false, error: 'Failed to delete project.' };
+    const error = e instanceof Error ? e.message : 'Failed to delete project.';
+    console.error(`Error in deleteProject: ${error}`);
+    return { success: false, error };
   }
 }
 
@@ -54,13 +56,14 @@ export async function updateSubTaskStatus(id: string, completed: boolean): Promi
         revalidatePath('/');
         return { success: true, data: updatedSubTask };
     } catch (e) {
-        return { success: false, error: 'Failed to update sub-task.' };
+        const error = e instanceof Error ? e.message : 'Failed to update sub-task.';
+        console.error(`Error in updateSubTaskStatus: ${error}`);
+        return { success: false, error };
     }
 }
 
 
 // --- AI Action ---
-
 export async function planProjectWithAI(prompt: string): Promise<ActionState<{projectId: string}>> {
   if (!prompt) {
     return { success: false, error: 'Prompt cannot be empty.' };

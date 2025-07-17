@@ -12,7 +12,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { updateSubTaskStatus, deleteProject } from '@/lib/actions';
-import { ProjectWithSubTasks, SubTask } from '@/lib/definitions';
+import { ProjectWithSubTasks } from '@/lib/definitions';
 import { Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -90,11 +90,11 @@ export function ProjectCard({ project: initialProject, onUpdate }: ProjectCardPr
       <CardHeader className="p-0">
         <div className="relative w-full h-40">
           <Image
-            src={project.imageUrl}
+            src={project.imageUrl || 'https://placehold.co/600x400.png'}
             alt={project.title}
             fill
             className="object-cover rounded-t-lg"
-            unoptimized={project.imageUrl.startsWith('data:image')}
+            unoptimized={project.imageUrl?.startsWith('data:image')}
             data-ai-hint="project image abstract"
           />
         </div>

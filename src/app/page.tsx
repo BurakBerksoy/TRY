@@ -34,7 +34,7 @@ export default function Home() {
         toast({
             variant: 'destructive',
             title: 'Error Loading Projects',
-            description: result.error || 'Failed to load projects. Please ensure the database is set up correctly.',
+            description: result.error || 'Failed to load projects. Please ensure the database is set up correctly and you have run `npx prisma migrate dev`.',
         });
       }
     } catch (e: any) {
@@ -76,7 +76,7 @@ export default function Home() {
           <FolderKanban className="h-12 w-12 text-muted-foreground" />
         </div>
         <h2 className="mt-6 text-xl font-semibold">No Projects Yet</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Get started by creating your first project with AI.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Get started by creating your first project with our AI assistant.</p>
         <div className="mt-6">
           <AddProjectDialog onProjectAdded={fetchProjects} />
         </div>
@@ -87,10 +87,10 @@ export default function Home() {
   return (
     <SidebarProvider>
       <Sidebar className="sidebar" collapsible="icon">
-        <SidebarHeader className="sidebar-header flex items-center justify-between p-4">
+        <SidebarHeader className="sidebar-header flex items-center justify-between p-4 bg-primary/90">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="shrink-0">
-              <Bot className="h-5 w-5 text-primary-foreground" />
+            <Button variant="ghost" size="icon" className="shrink-0 text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground">
+              <Bot className="h-5 w-5" />
             </Button>
             <h1 className="text-lg font-bold truncate text-primary-foreground">TaskMaster</h1>
           </div>

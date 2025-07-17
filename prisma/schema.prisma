@@ -2,10 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  // The line below is a workaround for a known issue with Prisma in some environments.
-  // See: https://github.com/prisma/prisma/issues/15312
-  binaryTargets   = ["native", "rhel-openssl-1.1.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -17,17 +14,17 @@ model Project {
   id        String    @id @default(cuid())
   title     String
   imageUrl  String
-  subTasks  SubTask[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  subTasks  SubTask[]
 }
 
 model SubTask {
-  id        String   @id @default(cuid())
-  text      String
-  completed Boolean  @default(false)
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  text       String
+  completed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId  String
 }

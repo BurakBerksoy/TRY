@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import { getProjects } from '@/lib/actions';
 import { AddProjectDialog } from '@/components/project/add-project-dialog';
 import { ProjectCard } from '@/components/project/project-card';
@@ -18,49 +18,48 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
   const [projects, setProjects] = useState<ProjectWithSubTasks[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const fetchProjects = async () => {
-    setLoading(true);
     try {
       const result = await getProjects();
       if (result.success && result.data) {
         setProjects(result.data);
       } else {
-        setError(result.error || 'Failed to load projects.');
+        toast({
+            variant: 'destructive',
+            title: 'Error Loading Projects',
+            description: result.error || 'Failed to load projects. Please ensure the database is set up correctly.',
+        });
       }
     } catch (e: any) {
-      setError(e.message || 'An unexpected error occurred.');
+        toast({
+            variant: 'destructive',
+            title: 'An Unexpected Error Occurred',
+            description: e.message || 'Could not connect to the server to fetch projects.',
+        });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProjects();
+    startTransition(() => {
+        setLoading(true);
+        fetchProjects();
+    });
   }, []);
 
   const renderContent = () => {
-    if (loading && projects.length === 0) {
+    if (loading) {
       return (
-        <div className="flex h-full items-center justify-center">
+        <div className="flex h-full items-center justify-center p-10">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="flex h-full items-center justify-center">
-          <div className="rounded-lg border border-destructive bg-destructive/10 p-6 text-center text-destructive">
-            <h2 className="text-lg font-semibold">Error Loading Projects</h2>
-            <p className="mt-2 text-sm">{error}</p>
-            <p className="mt-4 text-xs text-destructive/80">Please ensure the database is set up correctly and your AI API key is configured.</p>
-          </div>
         </div>
       );
     }
@@ -91,9 +90,9 @@ export default function Home() {
         <SidebarHeader className="sidebar-header flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0">
-              <Bot className="h-5 w-5 text-primary" />
+              <Bot className="h-5 w-5 text-primary-foreground" />
             </Button>
-            <h1 className="text-lg font-bold truncate">TaskMaster</h1>
+            <h1 className="text-lg font-bold truncate text-primary-foreground">TaskMaster</h1>
           </div>
         </SidebarHeader>
         <SidebarContent>

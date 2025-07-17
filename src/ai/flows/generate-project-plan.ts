@@ -40,13 +40,16 @@ export async function generateProjectPlan(input: GenerateProjectPlanInput): Prom
 const projectPlannerPrompt = ai.definePrompt({
   name: 'projectPlannerPrompt',
   input: { schema: GenerateProjectPlanInputSchema },
-  output: { schema: GenerateProjectPlanOutputSchema },
+  // We only generate text here to make the flow more robust.
+  output: { schema: z.object({
+    title: z.string().describe('The generated title for the project.'),
+    subTasks: z.array(SubTaskSchema).describe('A list of 3 to 5 actionable sub-tasks to complete the project.'),
+  }) },
   prompt: `You are an expert project manager. A user will provide a prompt for a project.
 Your task is to generate a concise project plan.
 The plan should include:
 1.  A clear and concise title for the project.
 2.  A list of 3 to 5 actionable sub-tasks to complete the project.
-3.  A placeholder image URL that is thematically related to the project. Use the format https://placehold.co/600x400.png for the image.
 
 Analyze the user's prompt and create a structured response.
 
@@ -57,7 +60,7 @@ User prompt: {{{prompt}}}
 // Image Generation Prompt (Simplified for this flow)
 const imageGenerationPrompt = (title: string) => `
 Generate a thematic, visually appealing, and modern flat-illustration-style image for a project titled "${title}".
-The image should be simple, symbolic, and use a professional color palette. Do not include any text in the image.
+The image should be simple, symbolic, and use a professional color palette. Do not include any text in the image. The style should be abstract and minimalist.
 `;
 
 // The main flow
@@ -72,20 +75,28 @@ const generateProjectPlanFlow = ai.defineFlow(
     const textPlanResponse = await projectPlannerPrompt(input);
     const textPlan = textPlanResponse.output;
 
-    if (!textPlan) {
-      throw new Error('Failed to generate project plan text.');
+    if (!textPlan || !textPlan.title || textPlan.subTasks.length === 0) {
+      throw new Error('Failed to generate project plan text. The AI returned an incomplete plan.');
     }
 
-    // Step 2: Generate an image based on the generated title
-    const { media } = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: imageGenerationPrompt(textPlan.title),
-        config: {
-            responseModalities: ['TEXT', 'IMAGE'],
-        },
-    });
-    
-    const imageUrl = media.url || 'https://placehold.co/600x400.png';
+    // Step 2: Generate an image in parallel. If it fails, use a placeholder.
+    let imageUrl = `https://placehold.co/600x400.png`; // Default placeholder
+    try {
+        const { media } = await ai.generate({
+            model: 'googleai/gemini-2.0-flash-preview-image-generation',
+            prompt: imageGenerationPrompt(textPlan.title),
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+            },
+        });
+        
+        if (media && media.url) {
+            imageUrl = media.url;
+        }
+    } catch (e) {
+        console.error("Image generation failed, using placeholder.", e);
+        // The flow will continue with the placeholder URL, so no need to re-throw
+    }
 
     // Step 3: Combine results and return the final plan
     return {
